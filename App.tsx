@@ -4,115 +4,80 @@
  *
  * @format
  */
+import './global.css';
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import {StyleSheet} from 'react-native';
 
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  NavigationContainer,
+  Theme,
+  ThemeProvider,
+} from '@react-navigation/native';
+import {NAV_THEME} from './lib/constants';
+import {hydrateAuth, useAuth} from './core/auth';
+import {loadSelectedTheme} from './core/hooks';
+import {useThemeConfig} from './core/use-theme-config';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {KeyboardProvider} from 'react-native-keyboard-controller';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {APIProvider} from './api/api-provider';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import FlashMessage from 'react-native-flash-message';
+import ErrorBoundary from 'react-native-error-boundary';
+import ErrorFallback from './pages/error/ErrorFallback';
+import RootNavigator from './navigation/RootStack';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const LIGHT_THEME: Theme = {
+  dark: false,
+  colors: NAV_THEME.light,
+};
+const DARK_THEME: Theme = {
+  dark: true,
+  colors: NAV_THEME.dark,
+};
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+hydrateAuth();
+loadSelectedTheme();
+
+export default function App() {
+  const {status} = useAuth();
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <Providers>
+      <RootNavigator isLoggedIn={status === 'signIn'} />
+    </Providers>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
+function Providers({children}: {children: React.ReactNode}) {
+  const theme = useThemeConfig();
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <NavigationContainer>
+      <SafeAreaProvider>
+        <GestureHandlerRootView
+          style={styles.container}
+          className={theme.dark ? `dark` : undefined}>
+          <KeyboardProvider>
+            <ThemeProvider value={theme}>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <APIProvider>
+                  <BottomSheetModalProvider>
+                    {children}
+                    <FlashMessage position="top" />
+                  </BottomSheetModalProvider>
+                </APIProvider>
+              </ErrorBoundary>
+            </ThemeProvider>
+          </KeyboardProvider>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    flex: 1,
   },
 });
-
-export default App;
