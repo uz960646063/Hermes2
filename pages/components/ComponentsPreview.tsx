@@ -8,7 +8,7 @@ import {Text} from '../../components/ui/text';
 import MainInfoCard, {
   BreakingNews,
 } from '../../components/molecules/main-info-card';
-import AlertInfoCard from '../../components/molecules/alert-info-card';
+import AlertInfoCard from '../../components/molecules/notification-info-card';
 import StandardInfoCard, {
   Article,
 } from '../../components/molecules/standard-info-card';

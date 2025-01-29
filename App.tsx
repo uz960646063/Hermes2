@@ -19,7 +19,10 @@ import {hydrateAuth, useAuth} from './core/auth';
 import {loadSelectedTheme} from './core/hooks';
 import {useThemeConfig} from './core/use-theme-config';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {KeyboardProvider} from 'react-native-keyboard-controller';
+import {
+  KeyboardAvoidingView,
+  KeyboardProvider,
+} from 'react-native-keyboard-controller';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {APIProvider} from './api/api-provider';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -27,6 +30,7 @@ import FlashMessage from 'react-native-flash-message';
 import ErrorBoundary from 'react-native-error-boundary';
 import ErrorFallback from './pages/error/ErrorFallback';
 import RootNavigator from './navigation/RootStack';
+import {PortalHost} from '@rn-primitives/portal';
 
 const LIGHT_THEME: Theme = {
   dark: false,
@@ -65,6 +69,7 @@ function Providers({children}: {children: React.ReactNode}) {
                   <BottomSheetModalProvider>
                     {children}
                     <FlashMessage position="top" />
+                    <PortalHost />
                   </BottomSheetModalProvider>
                 </APIProvider>
               </ErrorBoundary>
